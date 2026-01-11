@@ -9,15 +9,29 @@ export const getProducts = async (filter: ProductFilters) => {
 	// price filters
 	if (minPrice !== undefined || maxPrice !== undefined) {
 		where.price = {};
-		if (minPrice !== undefined) where.price.gte = minPrice;
-		if (maxPrice !== undefined) where.price.lte = maxPrice;
+		if (minPrice !== undefined) {
+			where.price.gte = Number(minPrice);
+		}
+		if (maxPrice !== undefined) {
+			where.price.lte = Number(maxPrice);
+		}
 	}
 
 	// search (name, description)
 	if (search && search.trim()) {
 		where.OR = [
-			{ name: { contains: search, mode: "insensitive" } },
-			{ description: { contains: search, mode: "insensitive" } },
+			{
+				name: {
+					contains: search,
+					mode: "insensitive",
+				},
+			},
+			{
+				description: {
+					contains: search,
+					mode: "insensitive",
+				},
+			},
 		];
 	}
 
@@ -25,7 +39,6 @@ export const getProducts = async (filter: ProductFilters) => {
 	const skip = (Number(page) - 1) * Number(limit);
 
 	const orderBy: any = {};
-	// garantir que a ordenação seja por um campo válido
 	if (sortBy) {
 		orderBy[sortBy] = sortOrder || "asc";
 	}
