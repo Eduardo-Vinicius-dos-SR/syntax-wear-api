@@ -1,3 +1,6 @@
+// Require the framework and instantiate it
+
+// ESM
 import Fastify, { FastifyError } from "fastify";
 import "dotenv/config";
 import cors from "@fastify/cors";
@@ -7,6 +10,7 @@ import swagger from "@fastify/swagger";
 import scalar from "@scalar/fastify-api-reference";
 import jwt from "@fastify/jwt";
 import authRoutes from "./routes/auth.routes";
+import z, { ZodError } from "zod";
 import { errorHandler } from "./middlewares/error.middleware";
 
 const PORT = parseInt(process.env.PORT ?? "3000");
@@ -57,9 +61,11 @@ fastify.register(scalar, {
 		theme: "default",
 	},
 });
+
 fastify.register(productRoutes, { prefix: "/products" });
 fastify.register(authRoutes, { prefix: "/auth" });
 
+// Declare a route
 fastify.get("/", async (request, reply) => {
 	return {
 		message: "E-commerce Syntax Wear API",
@@ -77,11 +83,13 @@ fastify.get("/health", async (request, reply) => {
 
 fastify.setErrorHandler(errorHandler);
 
+// Run the server!
 fastify.listen({ port: PORT }, function (err, address) {
 	if (err) {
 		fastify.log.error(err);
 		process.exit(1);
 	}
+	// Server is now listening on ${address}
 });
 
 export default fastify;

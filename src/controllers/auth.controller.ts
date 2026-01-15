@@ -1,11 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { loginUser, registerUser } from "../services/auth.service";
 import { AuthRequest, RegisterRequest } from "../types";
-import z from "zod";
-import { loginSchema, registerSchema } from "../utils/validator";
+import { loginSchema, registerSchema } from "../utils/validators";
 
 export const register = async (request: FastifyRequest, reply: FastifyReply) => {
-	const validation = registerSchema.parse(request.body as RegisterRequest);
+	// Lógica de registro de usuário
+
+    const validation = registerSchema.parse(request.body as RegisterRequest);
 
 	const user = await registerUser(validation);
 
@@ -18,6 +19,7 @@ export const register = async (request: FastifyRequest, reply: FastifyReply) => 
 };
 
 export const login = async (request: FastifyRequest<{ Body: AuthRequest }>, reply: FastifyReply) => {
+
 	const validation = loginSchema.parse(request.body as AuthRequest);
 
 	const user = await loginUser(validation);

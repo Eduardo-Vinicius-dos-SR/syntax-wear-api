@@ -3,6 +3,7 @@ import { prisma } from "../utils/prisma";
 import bcrypt from "bcrypt";
 
 export const registerUser = async (payload: RegisterRequest) => {
+
 	const existingUser = await prisma.user.findUnique({
 		where: { email: payload.email },
 	});
@@ -11,7 +12,7 @@ export const registerUser = async (payload: RegisterRequest) => {
 		throw new Error("Email já cadastrado.");
 	}
 
-	const hashedPassword = await bcrypt.hash(payload.password, 10);
+    const hashedPassword = await bcrypt.hash(payload.password, 10);
 
 	const newUser = await prisma.user.create({
 		data: {
@@ -22,27 +23,27 @@ export const registerUser = async (payload: RegisterRequest) => {
 			cpf: payload.cpf,
 			birthDate: payload.dateOfBirth || undefined,
 			phone: payload.phone,
-			role: "USER",
+            role: "USER",
 		},
 	});
 
-	return newUser;
+    return newUser;
 };
 
 export const loginUser = async (data: AuthRequest) => {
-	const user = await prisma.user.findUnique({
-		where: { email: data.email },
-	});
+    const user = await prisma.user.findUnique({
+        where: { email: data.email },
+    });
 
-	if (!user) {
-		throw new Error("Usuário não encontrado.");
-	}
+    if(!user) {
+        throw new Error("Usuário não encontrado.");
+    }
 
-	const isValidPassword = await bcrypt.compare(data.password, user.password);
+    const isValidPassword = await bcrypt.compare(data.password, user.password);
 
-	if (!isValidPassword) {
-		throw new Error("Senha inválida.");
-	}
+    if(!isValidPassword) {
+        throw new Error("Senha inválida.");
+    }
 
-	return user;
+    return user;
 };

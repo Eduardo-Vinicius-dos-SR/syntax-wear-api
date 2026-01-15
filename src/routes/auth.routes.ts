@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { login, register } from "../controllers/auth.controller";
+import { register, login } from "../controllers/auth.controller";
 
 export default async function authRoutes(fastify: FastifyInstance) {
 	fastify.post(
@@ -36,8 +36,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
 					type: "object",
 					required: ["email", "password"],
 					properties: {
-						email: { type: "string", format: "email", description: "Email do usuário" },
-						password: { type: "string", minLength: 6, description: "Senha do usuário" },
+						email: { type: "string", description: "Email do usuário" },
+						password: { type: "string", description: "Senha do usuário" },
 					},
 				},
 			},

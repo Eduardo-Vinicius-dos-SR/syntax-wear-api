@@ -30,6 +30,7 @@ model Product {
    name        String
    slug        String   @unique
    description String?
+   colors      Json?
    price       Decimal
    images      Json?
    sizes       Json?
