@@ -1,5 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { createNewProduct, getProduct, listProducts, updateExistingProduct } from "../controllers/products.controller";
+import {
+	createNewProduct,
+	deleteExistingProduct,
+	getProduct,
+	listProducts,
+	updateExistingProduct,
+} from "../controllers/products.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { UpdateProduct } from "../types";
 
@@ -169,83 +175,120 @@ export default async function productRoutes(fastify: FastifyInstance) {
 	);
 
 	fastify.put<{ Body: UpdateProduct; Params: { id: string } }>(
-			"/:id",
-			{
-				schema: {
-					tags: ["Products"],
-					description: "Atualizar produto",
-					security: [{ bearerAuth: [] }],
-					params: {
-						type: "object",
-						properties: {
-							id: { type: "string", description: "ID do produto" },
-						},
-						required: ["id"],
+		"/:id",
+		{
+			schema: {
+				tags: ["Products"],
+				description: "Atualizar produto",
+				security: [{ bearerAuth: [] }],
+				params: {
+					type: "object",
+					properties: {
+						id: { type: "string", description: "ID do produto" },
 					},
-					body: {
+					required: ["id"],
+				},
+				body: {
+					type: "object",
+					properties: {
+						name: { type: "string" },
+						description: { type: "string" },
+						price: { type: "number" },
+						categoryId: { type: "number" },
+						active: { type: "boolean" },
+						stock: { type: "number" },
+						colors: {
+							type: "array",
+							items: { type: "string" },
+						},
+						images: {
+							type: "array",
+							items: { type: "string" },
+						},
+						sizes: {
+							type: "array",
+							items: { type: "string" },
+						},
+					},
+				},
+				response: {
+					200: {
+						description: "Produto atualizado",
 						type: "object",
 						properties: {
+							id: { type: "string" },
 							name: { type: "string" },
-							description: { type: "string" },
+							description: { type: "string", nullable: true },
 							price: { type: "number" },
-							categoryId: { type: "number" },
-							active: { type: "boolean" },
-							stock: { type: "number" },
-							colors: {
-								type: "array",
-								items: { type: "string" },
-							},
-							images: {
-								type: "array",
-								items: { type: "string" },
-							},
-							sizes: {
-								type: "array",
-								items: { type: "string" },
-							},
+							color: { type: "string", nullable: true },
+							stock: { type: "integer" },
+							tags: { type: "array", items: { type: "string" } },
+							slug: { type: "string" },
 						},
 					},
-					response: {
-						200: {
-							description: "Produto atualizado",
-							type: "object",
-							properties: {
-								id: { type: "string" },
-								name: { type: "string" },
-								description: { type: "string", nullable: true },
-								price: { type: "number" },
-								color: { type: "string", nullable: true },
-								stock: { type: "integer" },
-								tags: { type: "array", items: { type: "string" } },
-								slug: { type: "string" },
-							},
+					400: {
+						description: "Erro de validação",
+						type: "object",
+						properties: {
+							error: { type: "string" },
+							details: { type: "array", nullable: true },
 						},
-						400: {
-							description: "Erro de validação",
-							type: "object",
-							properties: {
-								error: { type: "string" },
-								details: { type: "array", nullable: true },
-							},
+					},
+					404: {
+						description: "Produto não encontrado",
+						type: "object",
+						properties: {
+							error: { type: "string" },
 						},
-						404: {
-							description: "Produto não encontrado",
-							type: "object",
-							properties: {
-								error: { type: "string" },
-							},
-						},
-						401: {
-							description: "Não autenticado",
-							type: "object",
-							properties: {
-								error: { type: "string" },
-							},
+					},
+					401: {
+						description: "Não autenticado",
+						type: "object",
+						properties: {
+							error: { type: "string" },
 						},
 					},
 				},
 			},
-			updateExistingProduct
-		);
-	
+		},
+		updateExistingProduct
+	);
+
+	fastify.delete<{ Params: { id: string } }>(
+		"/:id",
+		{
+			schema: {
+				tags: ["Products"],
+				description: "Deletar um produto",
+				params: {
+					type: "object",
+					properties: {
+						id: { type: "number", description: "ID do produto" },
+					},
+					required: ["id"],
+				},
+				response: {
+					204: {
+						description: "Produto deletado com sucesso",
+						type: "null",
+					},
+					404: {
+						description: "Produto não encontrado",
+						type: "object",
+						properties: {
+							message: { type: "string" },
+						},
+					},
+					500: {
+						description: "Erro interno do servidor",
+						type: "object",
+						properties: {
+							message: { type: "string" },
+						},
+					},
+				},
+			},
+		},
+		deleteExistingProduct
+	);
 }
