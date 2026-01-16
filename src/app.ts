@@ -25,6 +25,8 @@ fastify.register(jwt, {
 fastify.register(cors, {
 	origin: true,
 	credentials: true,
+	methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+	allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"],
 });
 fastify.register(helmet, {
 	contentSecurityPolicy: false,
