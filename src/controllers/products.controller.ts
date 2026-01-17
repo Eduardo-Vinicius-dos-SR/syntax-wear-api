@@ -15,12 +15,8 @@ export const listProducts = async (request: FastifyRequest<{ Querystring: Produc
 	reply.status(200).send(result);
 };
 
-export const getProduct = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-	const id = Number(request.params.id);
-	if (Number.isNaN(id)) {
-		return reply.status(400).send({ message: "ID inválido" });
-	}
-	const product = await getProductById(id);
+export const getProduct = async (request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply) => {
+	const product = await getProductById(request.params.id);
 	reply.status(200).send(product);
 };
 
@@ -41,7 +37,7 @@ export const createNewProduct = async (request: FastifyRequest<{ Body: CreatePro
 
 export const updateExistingProduct = async (
 	request: FastifyRequest<{ Params: { id: string }; Body: Partial<CreateProduct> }>,
-	reply: FastifyReply
+	reply: FastifyReply,
 ) => {
 	const { id } = request.params;
 	const body = request.body;
@@ -61,12 +57,12 @@ export const updateExistingProduct = async (
 };
 
 export const deleteExistingProduct = async (
-	request: FastifyRequest<{ Params: { id: string } }>,
-	reply: FastifyReply
+	request: FastifyRequest<{ Params: { id: number } }>,
+	reply: FastifyReply,
 ) => {
 	const { id } = request.params;
 
-	const validate = deleteProductSchema.parse({ id: Number(id) });
+	const validate = deleteProductSchema.parse({ id });
 
 	await deleteProduct(validate.id);
 
