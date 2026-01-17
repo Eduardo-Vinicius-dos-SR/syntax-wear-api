@@ -10,7 +10,7 @@ import { authenticate } from "../middlewares/auth.middleware";
 import { UpdateProduct } from "../types";
 
 export default async function productRoutes(fastify: FastifyInstance) {
-	fastify.addHook("onRequest", authenticate);
+	//fastify.addHook("onRequest", authenticate);
 	fastify.get(
 		"/",
 		{
@@ -19,7 +19,7 @@ export default async function productRoutes(fastify: FastifyInstance) {
 				description: "Lista produtos com filtros opcionais",
 				response: {
 					200: {
-						description: "Lista de produtos com paginação",
+						description: "Lista de produtos",
 						type: "object",
 						properties: {
 							data: {
@@ -35,8 +35,20 @@ export default async function productRoutes(fastify: FastifyInstance) {
 											type: "array",
 											items: { type: "string" },
 										},
-										createdAt: { type: "string", format: "date-time" },
-										updatedAt: { type: "string", format: "date-time" },
+										sizes: {
+											type: "array",
+											items: { type: "string" },
+										},
+										images: {
+											type: "array",
+											items: { type: "string" },
+										},
+										slug: { type: "string" },
+										stock: { type: "number" },
+										active: { type: "boolean" },
+										categoryId: { type: "number" },
+										createdAt: { type: "string" },
+										updatedAt: { type: "string" },
 									},
 								},
 							},
@@ -69,13 +81,14 @@ export default async function productRoutes(fastify: FastifyInstance) {
 						minPrice: { type: "number" },
 						maxPrice: { type: "number" },
 						search: { type: "string" },
+						categoryId: { type: "number" },
 						sortBy: { type: "string", enum: ["price", "name", "createdAt"] },
 						sortOrder: { type: "string", enum: ["asc", "desc"] },
 					},
 				},
 			},
 		},
-		listProducts
+		listProducts,
 	);
 
 	fastify.get(
@@ -87,7 +100,7 @@ export default async function productRoutes(fastify: FastifyInstance) {
 				params: {
 					type: "object",
 					properties: {
-						id: { type: "string" },
+						id: { type: "number" },
 					},
 					required: ["id"],
 				},
@@ -118,6 +131,14 @@ export default async function productRoutes(fastify: FastifyInstance) {
 							slug: { type: "string" },
 							active: { type: "boolean" },
 							updatedAt: { type: "string", format: "date-time" },
+							categoryId: { type: "number" },
+							category: {
+								type: "object",
+								properties: {
+									id: { type: "number" },
+									name: { type: "string" },
+								},
+							},
 						},
 					},
 					400: {
@@ -137,7 +158,7 @@ export default async function productRoutes(fastify: FastifyInstance) {
 				},
 			},
 		},
-		getProduct
+		getProduct,
 	);
 
 	fastify.post(
@@ -146,35 +167,63 @@ export default async function productRoutes(fastify: FastifyInstance) {
 			schema: {
 				tags: ["Products"],
 				description: "Criar um novo produto",
-				required: ["name", "description", "price", "slug", "active", "stock"],
 				body: {
 					type: "object",
+					required: ["name", "description", "price", "categoryId"],
 					properties: {
-						name: { type: "string" },
-						description: { type: "string" },
-						price: { type: "number" },
-						active: { type: "boolean" },
-						stock: { type: "number" },
+						name: { type: "string", description: "Nome do produto" },
+						description: { type: "string", description: "Descrição do produto" },
+						price: { type: "number", description: "Preço do produto" },
+						categoryId: { type: "number", description: "ID da categoria do produto" },
+						stock: { type: "number", description: "Quantidade em estoque" },
+						active: { type: "boolean", description: "Produto ativo" },
 						colors: {
 							type: "array",
 							items: { type: "string" },
+							description: "Cores disponíveis",
 						},
 						images: {
 							type: "array",
 							items: { type: "string" },
+							description: "URLs das imagens",
 						},
 						sizes: {
 							type: "array",
 							items: { type: "string" },
+							description: "Tamanhos disponíveis",
+						},
+					},
+				},
+				response: {
+					201: {
+						description: "Produto criado com sucesso",
+						type: "object",
+						properties: {
+							message: { type: "string" },
+						},
+					},
+					400: {
+						description: "Erro de validação",
+						type: "object",
+						properties: {
+							message: { type: "string" },
+							errors: { type: "object" },
+						},
+					},
+					500: {
+						description: "Erro interno do servidor",
+						type: "object",
+						properties: {
+							message: { type: "string" },
 						},
 					},
 				},
 			},
 		},
-		createNewProduct
+		createNewProduct,
 	);
 
-	fastify.put<{ Body: UpdateProduct; Params: { id: string } }>(
+	fastify.put(
 		"/:id",
 		{
 			schema: {
@@ -223,7 +272,6 @@ export default async function productRoutes(fastify: FastifyInstance) {
 							color: { type: "string", nullable: true },
 							stock: { type: "integer" },
 							tags: { type: "array", items: { type: "string" } },
-							slug: { type: "string" },
 						},
 					},
 					400: {
@@ -251,10 +299,10 @@ export default async function productRoutes(fastify: FastifyInstance) {
 				},
 			},
 		},
-		updateExistingProduct
+		updateExistingProduct,
 	);
 
-	fastify.delete<{ Params: { id: string } }>(
+	fastify.delete(
 		"/:id",
 		{
 			schema: {
@@ -289,6 +337,6 @@ export default async function productRoutes(fastify: FastifyInstance) {
 				},
 			},
 		},
-		deleteExistingProduct
+		deleteExistingProduct,
 	);
 }
