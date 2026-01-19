@@ -7,8 +7,8 @@ import {
 	deleteExistingProduct,
 } from "../controllers/products.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireAdmin } from "../middlewares/admin.middleware";
 import { CreateProduct, UpdateProduct } from "../types";
+import { requireAdmin } from "../middlewares/admin.middleware";
 
 export default async function productRoutes(fastify: FastifyInstance) {
 	fastify.get(
