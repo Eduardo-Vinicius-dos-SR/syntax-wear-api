@@ -23,7 +23,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
 				},
 			},
 		},
-		register
+		register,
 	);
 
 	fastify.post(
@@ -42,6 +42,6 @@ export default async function authRoutes(fastify: FastifyInstance) {
 				},
 			},
 		},
-		login
+		login,
 	);
 }

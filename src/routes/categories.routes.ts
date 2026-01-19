@@ -7,11 +7,11 @@ import {
 	deleteExistingCategory,
 } from "../controllers/categories.controller";
 import { authenticate } from "../middlewares/auth.middleware";
+import { requireAdmin } from "../middlewares/admin.middleware";
+import type { CreateCategory, UpdateCategory, CategoryFilters } from "../types";
 
 export default async function categoryRoutes(fastify: FastifyInstance) {
-	//fastify.addHook("onRequest", authenticate);
-
-	fastify.get(
+	fastify.get<{ Querystring: CategoryFilters }>(
 		"/",
 		{
 			schema: {
@@ -79,7 +79,7 @@ export default async function categoryRoutes(fastify: FastifyInstance) {
 		listCategories,
 	);
 
-	fastify.get(
+	fastify.get<{ Params: { id: string } }>(
 		"/:id",
 		{
 			schema: {
@@ -141,9 +141,10 @@ export default async function categoryRoutes(fastify: FastifyInstance) {
 		getCategory,
 	);
 
-	fastify.post(
+	fastify.post<{ Body: CreateCategory }>(
 		"/",
 		{
+			onRequest: [requireAdmin], // Requer autenticação + role ADMIN
 			schema: {
 				tags: ["Categories"],
 				description: "Criar uma nova categoria",
@@ -193,9 +194,10 @@ export default async function categoryRoutes(fastify: FastifyInstance) {
 		createNewCategory,
 	);
 
-	fastify.put(
+	fastify.put<{ Params: { id: string }; Body: UpdateCategory }>(
 		"/:id",
 		{
+			onRequest: [requireAdmin], // Requer autenticação + role ADMIN
 			schema: {
 				tags: ["Categories"],
 				description: "Atualizar categoria",
@@ -263,9 +265,10 @@ export default async function categoryRoutes(fastify: FastifyInstance) {
 		updateExistingCategory,
 	);
 
-	fastify.delete(
+	fastify.delete<{ Params: { id: string } }>(
 		"/:id",
 		{
+			onRequest: [requireAdmin], // Requer autenticação + role ADMIN
 			schema: {
 				tags: ["Categories"],
 				description: "Deletar uma categoria (soft delete em cascata)",
