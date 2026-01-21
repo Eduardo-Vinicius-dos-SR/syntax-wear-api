@@ -7,8 +7,8 @@ import {
 	deleteExistingProduct,
 } from "../controllers/products.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-import { CreateProduct, UpdateProduct } from "../types";
 import { requireAdmin } from "../middlewares/admin.middleware";
+import { CreateProduct, UpdateProduct } from "../types";
 
 export default async function productRoutes(fastify: FastifyInstance) {
 	fastify.get(
@@ -274,6 +274,7 @@ export default async function productRoutes(fastify: FastifyInstance) {
 							color: { type: "string", nullable: true },
 							stock: { type: "integer" },
 							tags: { type: "array", items: { type: "string" } },
+							slug: { type: "string" },
 						},
 					},
 					400: {

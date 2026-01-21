@@ -6,7 +6,7 @@ export const getProducts = async (filter: ProductFilters) => {
 
 	const where: any = {};
 
-	//Filtro por categoria
+	// Filtro por categoria
 	if (categoryId) {
 		where.categoryId = categoryId;
 	}
@@ -91,6 +91,15 @@ export const getProductById = async (id: number) => {
 };
 
 export const createProduct = async (data: CreateProduct) => {
+	// Valida se a categoria existe
+	const categoryExists = await prisma.category.findUnique({
+		where: { id: data.categoryId },
+	});
+
+	if (!categoryExists) {
+		throw new Error("Categoria não encontrada");
+	}
+
 	const existingProduct = await prisma.product.findUnique({
 		where: { slug: data.slug },
 	});
@@ -102,7 +111,6 @@ export const createProduct = async (data: CreateProduct) => {
 	const newProduct = await prisma.product.create({ data });
 	return newProduct;
 };
-
 export const updateProduct = async (id: number, data: UpdateProduct) => {
 	const existingProduct = await prisma.product.findUnique({
 		where: { id },
@@ -112,7 +120,18 @@ export const updateProduct = async (id: number, data: UpdateProduct) => {
 		throw new Error("Produto não encontrado");
 	}
 
-	if (data.slug && data.slug !== existingProduct.slug) {
+	// Valida se a categoria existe quando categoryId é fornecido
+	if (data.categoryId) {
+		const categoryExists = await prisma.category.findUnique({
+			where: { id: data.categoryId },
+		});
+
+		if (!categoryExists) {
+			throw new Error("Categoria não encontrada");
+		}
+	}
+
+	if (data.slug) {
 		const slugExists = await prisma.product.findUnique({
 			where: { slug: data.slug },
 		});
