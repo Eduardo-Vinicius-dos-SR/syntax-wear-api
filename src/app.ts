@@ -11,6 +11,7 @@ import orderRoutes from "./routes/orders.routes";
 import swagger from "@fastify/swagger";
 import scalar from "@scalar/fastify-api-reference";
 import jwt from "@fastify/jwt";
+import cookie from "@fastify/cookie";
 import authRoutes from "./routes/auth.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 
@@ -37,8 +38,14 @@ export async function buildApp(): Promise<FastifyInstance> {
 		},
 	});
 
+	fastify.register(cookie);
+
 	fastify.register(jwt, {
 		secret: process.env.JWT_SECRET!,
+		cookie: {
+			cookieName: "syntaxwear.token",
+			signed: false,
+		},
 	});
 
 	fastify.register(cors, {

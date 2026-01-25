@@ -6,7 +6,7 @@ import { loginSchema, registerSchema } from "../utils/validators";
 export const register = async (request: FastifyRequest, reply: FastifyReply) => {
 	// Lógica de registro de usuário
 
-    const validation = registerSchema.parse(request.body as RegisterRequest);
+	const validation = registerSchema.parse(request.body as RegisterRequest);
 
 	const user = await registerUser(validation);
 
@@ -19,17 +19,25 @@ export const register = async (request: FastifyRequest, reply: FastifyReply) => 
 };
 
 export const login = async (request: FastifyRequest<{ Body: AuthRequest }>, reply: FastifyReply) => {
-
 	const validation = loginSchema.parse(request.body as AuthRequest);
 
-	const user = await loginUser(validation);
+	const user = await loginUser(validation, reply);
 
-	const token = request.server.jwt.sign({ userId: user.id });
+	if (!user) return;
+
+	const token = request.server.jwt.sign({ userId: user?.id });
+
+	reply.setCookie("syntaxwear.token", token, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === "production",
+		sameSite: "lax",
+		path: "/",
+		maxAge: 60 * 60 * 24,
+	});
 
 	reply.status(200).send({
 		user,
-		token,
 	});
 };
 
-export const profile = async (request: FastifyRequest, reply: FastifyReply) => reply.send(request.user)
+export const profile = async (request: FastifyRequest, reply: FastifyReply) => reply.send(request.user);
