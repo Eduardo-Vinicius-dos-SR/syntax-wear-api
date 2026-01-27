@@ -4,13 +4,21 @@ import { prisma } from "../utils/prisma";
 import bcrypt from "bcrypt";
 import { OAuth2Client } from "google-auth-library";
 
-export const registerUser = async (payload: RegisterRequest) => {
-	const existingUser = await prisma.user.findUnique({
-		where: { email: payload.email },
+export const registerUser = async (payload: RegisterRequest, reply: FastifyReply) => {
+	const existingUser = await prisma.user.findFirst({
+		where: {
+			OR: [{ email: payload.email }, { cpf: payload.cpf }],
+		},
 	});
 
 	if (existingUser) {
-		throw new Error("Email já cadastrado.");
+		if (existingUser.email === payload.email) {
+			return reply.status(409).send({ message: "E-mail já cadastrado" });
+		}
+
+		if (existingUser.cpf === payload.cpf) {
+			return reply.status(409).send({ message: "CPF já cadastrado" });
+		}
 	}
 
 	const hashedPassword = await bcrypt.hash(payload.password, 10);
@@ -22,7 +30,7 @@ export const registerUser = async (payload: RegisterRequest) => {
 			email: payload.email,
 			password: hashedPassword,
 			cpf: payload.cpf,
-			birthDate: payload.dateOfBirth || undefined,
+			birthDate: payload.birthDate ? new Date(payload.birthDate) : undefined,
 			phone: payload.phone,
 			role: "USER",
 		},
